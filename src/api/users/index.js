@@ -2,18 +2,33 @@ import express from "express";
 import createHttpError from "http-errors";
 import UsersModel from "./model.js";
 import q2m from "query-to-mongo";
+import { checkUserSchema, triggerBadRequest } from "./validator.js";
 
 const usersRouter = express.Router();
 
-usersRouter.post("/", async (req, res, next) => {
-  try {
-    const newUser = new UsersModel(req.body);
-    const { _id } = await newUser.save();
-    res.status(201).send({ _id });
-  } catch (error) {
-    next(error);
+usersRouter.post(
+  "/",
+  checkUserSchema,
+  triggerBadRequest,
+  async (req, res, next) => {
+    try {
+      const newUser = new UsersModel(req.body);
+      console.log(newUser);
+
+      const duplicate = await UsersModel.findOne({
+        username: newUser.username,
+      });
+      if (duplicate) {
+        next(createHttpError(400, "Username already exist"));
+      } else {
+        const { _id } = await newUser.save();
+        res.status(201).send({ _id });
+      }
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 usersRouter.get("/", async (req, res, next) => {
   try {
     const mongoQuery = q2m(req.query);
