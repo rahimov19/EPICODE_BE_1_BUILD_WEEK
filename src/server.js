@@ -10,12 +10,15 @@ import {
   notFoundHandler,
   genericErrorHandler,
 } from "./errorHandlers.js";
+import postsRouter from "./posts/index.js";
 
 const server = express();
 const port = process.env.PORT;
 
 server.use(cors());
 server.use(express.json());
+
+server.use("/posts", postsRouter);
 
 server.use(badRequestHandler);
 server.use(notFoundHandler);
