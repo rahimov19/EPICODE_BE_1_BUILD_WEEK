@@ -10,7 +10,10 @@ import {
   notFoundHandler,
   genericErrorHandler,
 } from "./errorHandlers.js";
+
+import usersRouter from "./api/users/index.js";
 import postsRouter from "./posts/index.js";
+
 
 const server = express();
 const port = process.env.PORT;
@@ -18,6 +21,7 @@ const port = process.env.PORT;
 server.use(cors());
 server.use(express.json());
 
+server.use("/users", usersRouter);
 server.use("/posts", postsRouter);
 
 server.use(badRequestHandler);
