@@ -15,13 +15,5 @@ const experiencesSchema = new Schema(
     timestamps: true,
   }
 );
-experiencesSchema.static("findExperiencess", async function (query) {
-  const total = await this.countDocuments(query.criteria);
-  const experiences = await this.find(query.criteria, query.options.fields)
-    .sort(query.options.sort)
-    .skip(query.options.skip)
-    .limit(query.options.limit);
 
-  return { total, experiences };
-});
-export default model("experiences", experiencesSchema);
+export default experiencesSchema;
