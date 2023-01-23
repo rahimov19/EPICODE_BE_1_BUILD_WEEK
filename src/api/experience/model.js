@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import ReviewsModel from "./reviewModal.js";
 const { Schema, model } = mongoose;
 
 const experiencesSchema = new Schema(

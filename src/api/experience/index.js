@@ -105,3 +105,4 @@ experienceRouter.delete("/:experienceId", async (req, res, next) => {
     next(error);
   }
 });
+export default experienceRouter;
