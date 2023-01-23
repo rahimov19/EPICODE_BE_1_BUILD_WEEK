@@ -6,7 +6,44 @@ import { pipeline } from "stream";
 import json2csv from "json2csv";
 import { getPDFReadableStream } from "../../lib/pdf-tools.js";
 import UsersModel from "../users/model.js";
+import PostsModel from "../posts/model.js";
+import createHttpError from "http-errors";
+
 const filesRouter = express.Router();
+
+const cloudinaryUploader = multer({
+  storage: new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: "BE_1_BUILD_WEEK/postsImgs",
+    },
+  }),
+}).single("postImg");
+
+filesRouter.post(
+  "/posts/:postId/image",
+  cloudinaryUploader,
+  async (req, res, next) => {
+    try {
+      const postId = req.params.postId;
+      console.log(req.file);
+      const url = req.file.path;
+      const updatedPost = await PostsModel.findByIdAndUpdate(
+        postId,
+        { image: url },
+        { new: true, runValidators: true }
+      );
+      if (updatedPost) {
+        res.send("File uploaded successfully");
+      } else {
+        next(createHttpError(404, `Post with id ${postId} was not found`));
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
 
 filesRouter.get("/:userId/pdf", async (req, res, next) => {
   res.setHeader("Content-Disposition", "attachment; filename=test.pdf");
