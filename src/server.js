@@ -12,7 +12,7 @@ import {
 } from "./errorHandlers.js";
 
 import usersRouter from "./api/users/index.js";
-import postsRouter from "./posts/index.js";
+import postsRouter from "./api/posts/index.js";
 import filesRouter from "./api/files/index.js";
 
 const server = express();
