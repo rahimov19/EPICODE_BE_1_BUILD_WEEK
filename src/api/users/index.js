@@ -154,7 +154,6 @@ usersRouter.get(
     try {
       const user = await UsersModel.findById(req.params.userId);
       if (user) {
-        console.log(user);
         const currentExperience = user.experiences.find(
           (user) => user._id.toString() === req.params.experienceId
         );
