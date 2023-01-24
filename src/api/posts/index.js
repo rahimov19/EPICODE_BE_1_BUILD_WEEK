@@ -61,8 +61,7 @@ postsRouter.get("/:postId", async (req, res, next) => {
 
 postsRouter.put(
   "/:postId",
-  checkpostSchema,
-  triggerPostsBadRequest,
+
   async (req, res, next) => {
     try {
       const postId = req.params.postId;
