@@ -1,6 +1,7 @@
 import express, { request } from "express";
 import httpErrors from "http-errors";
 import PostsModel from "./model.js";
+import UsersModel from "../users/model.js";
 import { checkpostSchema, triggerPostsBadRequest } from "./validator.js";
 
 const { NotFound } = httpErrors;
@@ -13,13 +14,19 @@ postsRouter.post(
   triggerPostsBadRequest,
   async (req, res, next) => {
     try {
-      const newPost = new PostsModel({
-        ...req.body,
-        image:
-          "https://img.freepik.com/vektoren-kostenlos/organische-flache-blogpostillustration-mit-leuten_23-2148955260.jpg",
-      });
-      const { _id } = await newPost.save();
-      res.status(201).send(`Post with id ${_id} created successfully`);
+      const userId = req.body.user;
+      const user = await UsersModel.findById(userId);
+      if (user) {
+        const newPost = new PostsModel({
+          ...req.body,
+          image:
+            "https://img.freepik.com/vektoren-kostenlos/organische-flache-blogpostillustration-mit-leuten_23-2148955260.jpg",
+        });
+        const { _id } = await newPost.save();
+        res.status(201).send(`Post with id ${_id} created successfully`);
+      } else {
+        next(NotFound(`User with id ${userId} not found`));
+      }
     } catch (error) {
       console.log(error);
       next(error);
