@@ -2,13 +2,12 @@ import express from "express";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import { pipeline } from "stream";
+import { pipeline, Readable } from "stream";
 import json2csv from "json2csv";
 import { getPDFReadableStream } from "../../lib/pdf-tools.js";
 import UsersModel from "../users/model.js";
 import PostsModel from "../posts/model.js";
 import createHttpError from "http-errors";
-import { trusted } from "mongoose";
 
 const filesRouter = express.Router();
 
@@ -143,4 +142,30 @@ filesRouter.get("/:userId/pdf", async (req, res, next) => {
     next(error);
   }
 });
+
+filesRouter.get("/:userId/experiences/CSV", async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    const user = await UsersModel.findById(userId);
+    if (user) {
+      const experiences = user.experiences;
+      const source = JSON.stringify(experiences);
+      const transform = new json2csv.Transform({
+        fields: ["role", "company", "description"],
+      });
+      const destination = res;
+      pipeline(source, transform, destination, (err) => {
+        if (err) {
+          console.log(err);
+        }
+      });
+    } else {
+      createHttpError(404, `User with id ${req.params.userId} is not found`);
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
 export default filesRouter;
