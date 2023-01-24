@@ -9,6 +9,7 @@ import UsersModel from "../users/model.js";
 import PostsModel from "../posts/model.js";
 import createHttpError from "http-errors";
 import { trusted } from "mongoose";
+import { Readable } from "stream";
 
 const filesRouter = express.Router();
 
@@ -143,4 +144,33 @@ filesRouter.get("/:userId/pdf", async (req, res, next) => {
     next(error);
   }
 });
+filesRouter.get("/:userId/experiences/CSV", async (req, res, next) => {
+  try {
+    const userCV = await UsersModel.findById(req.params.userId);
+    const experiences = userCV.experiences;
+    const source = new Readable({
+      read() {
+        this.push(JSON.stringify(experiences));
+        this.push(null);
+      },
+    });
+    // const sourceAsBuffer = Buffer.from(JSON.stringify(source));
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=experiences.csv"
+    );
+
+    const transform = new json2csv.Transform({
+      fields: ["role", "company", "description"],
+    });
+    const destination = res;
+    pipeline(source, transform, destination, (err) => {
+      if (err) console.log(err);
+    });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
 export default filesRouter;
