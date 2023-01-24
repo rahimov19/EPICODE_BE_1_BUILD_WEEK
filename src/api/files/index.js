@@ -20,13 +20,21 @@ const cloudinaryUploader = multer({
   }),
 }).single("postImg");
 
+const cloudinaryExperiencesUploader = multer({
+  storage: new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: "BE_1_BUILD_WEEK/expImgs",
+    },
+  }),
+}).single("expImg");
+
 filesRouter.post(
   "/posts/:postId/image",
   cloudinaryUploader,
   async (req, res, next) => {
     try {
       const postId = req.params.postId;
-      console.log(req.file);
       const url = req.file.path;
       const updatedPost = await PostsModel.findByIdAndUpdate(
         postId,
@@ -37,6 +45,41 @@ filesRouter.post(
         res.send("File uploaded successfully");
       } else {
         next(createHttpError(404, `Post with id ${postId} was not found`));
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+filesRouter.post(
+  "/users/:userId/experiences/:expId/image",
+  cloudinaryExperiencesUploader,
+  async (req, res, next) => {
+    try {
+      const userId = req.params.userId;
+      const expId = req.params.expId;
+      const url = req.file.path;
+      const user = await UsersModel.findById(userId);
+      if (user) {
+        const index = user.experiences.findIndex(
+          (exp) => exp._id.toString() === expId
+        );
+        if (index !== -1) {
+          user.experiences[index] = {
+            ...user.experiences[index].toObject(),
+            image: url,
+          };
+          await user.save();
+          res.send(user);
+        } else {
+          next(
+            createHttpError(404, `Experience with id ${expId} was not found`)
+          );
+        }
+      } else {
+        next(createHttpError(404, `User with id ${userId} was not found`));
       }
     } catch (error) {
       console.log(error);
