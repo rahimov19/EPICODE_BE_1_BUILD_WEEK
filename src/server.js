@@ -14,6 +14,7 @@ import {
 import usersRouter from "./api/users/index.js";
 import postsRouter from "./api/posts/index.js";
 import filesRouter from "./api/files/index.js";
+import requestsRouter from "./api/requests/index.js";
 // import experienceRouter from "./api/experience/index.js";
 
 const server = express();
@@ -39,6 +40,7 @@ server.use(express.json());
 server.use("/users", usersRouter);
 server.use("/posts", postsRouter);
 server.use("/files", filesRouter);
+server.use("/requests", requestsRouter);
 // server.use("/experiences", experienceRouter);
 
 server.use(badRequestHandler);
