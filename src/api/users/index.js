@@ -103,7 +103,7 @@ usersRouter.delete("/:userId", async (req, res, next) => {
 });
 
 // ********************************** EMBEDDING**************************
-usersRouter.post("/:userId", async (req, res, next) => {
+usersRouter.post("/:userId/experiences", async (req, res, next) => {
   try {
     const currentExperience = req.body;
 
