@@ -101,4 +101,140 @@ usersRouter.delete("/:userId", async (req, res, next) => {
   }
 });
 
+// ********************************** EMBEDDING**************************
+usersRouter.post("/:userId", async (req, res, next) => {
+  try {
+    const currentExperience = req.body;
+
+    if (currentExperience) {
+      const userToInsert = {
+        ...req.body,
+        experienceDate: new Date(),
+      };
+
+      const updatedUser = await UsersModel.findByIdAndUpdate(
+        req.params.userId,
+        { $push: { experiences: userToInsert } },
+        { new: true, runValidators: true }
+      );
+
+      if (updatedUser) {
+        res.send(updatedUser);
+      } else {
+        next(
+          createHttpError(404, `User with id ${req.params.userId} not found!`)
+        );
+      }
+    } else {
+      next(createHttpError(404, `User with id ${req.body.userId} not found!`));
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+usersRouter.get("/:userId/experiences", async (req, res, next) => {
+  try {
+    const user = await UsersModel.findById(req.params.userId);
+    if (user) {
+      res.send(user.experiences);
+    } else {
+      next(
+        createHttpError(404, `User with id ${req.params.userId} not found!`)
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+usersRouter.get(
+  "/:userId/experiences/:experienceId",
+  async (req, res, next) => {
+    try {
+      const user = await UsersModel.findById(req.params.userId);
+      if (user) {
+        const currentExperience = user.experiences.find(
+          (user) => user._id.toString() === req.params.experienceId
+        );
+        if (currentExperience) {
+          res.send(currentExperience);
+        } else {
+          next(
+            createHttpError(
+              404,
+              `Experience with id ${req.params.experienceId} not found!`
+            )
+          );
+        }
+      } else {
+        next(
+          createHttpError(404, `User with id ${req.params.userId} not found!`)
+        );
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+usersRouter.put(
+  "/:userId/experiences/:experienceId",
+  async (req, res, next) => {
+    try {
+      const user = await UsersModel.findById(req.params.userId);
+
+      if (user) {
+        const index = user.experiences.findIndex(
+          (user) => user._id.toString() === req.params.experienceId
+        );
+        if (index !== -1) {
+          user.experiences[index] = {
+            ...user.experiences[index].toObject(),
+            ...req.body,
+          };
+
+          await user.save();
+          res.send(user);
+        } else {
+          next(
+            createHttpError(
+              404,
+              `Experience with id ${req.params.experienceId} not found!`
+            )
+          );
+        }
+      } else {
+        next(
+          createHttpError(404, `User with id ${req.params.userId} not found!`)
+        );
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+usersRouter.delete(
+  "/:userId/experiences/:experienceId",
+  async (req, res, next) => {
+    try {
+      const updatedUser = await UsersModel.findByIdAndUpdate(
+        req.params.userId,
+        { $pull: { experiences: { _id: req.params.experienceId } } },
+        { new: true }
+      );
+      if (updatedUser) {
+        res.send(updatedUser);
+      } else {
+        next(
+          createHttpError(404, `User with id ${req.params.userId} not found!`)
+        );
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 export default usersRouter;
