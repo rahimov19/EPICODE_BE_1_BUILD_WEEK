@@ -8,6 +8,7 @@ import { getPDFReadableStream } from "../../lib/pdf-tools.js";
 import UsersModel from "../users/model.js";
 import PostsModel from "../posts/model.js";
 import createHttpError from "http-errors";
+import { trusted } from "mongoose";
 
 const filesRouter = express.Router();
 
@@ -28,6 +29,39 @@ const cloudinaryExperiencesUploader = multer({
     },
   }),
 }).single("expImg");
+
+const cloudinaryUsersUploader = multer({
+  storage: new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: "BE_1_BUILD_WEEK/usersImgs",
+    },
+  }),
+}).single("userImg");
+
+filesRouter.post(
+  "/users/:userId/image",
+  cloudinaryUsersUploader,
+  async (req, res, next) => {
+    try {
+      const userId = req.params.userId;
+      const url = req.file.path;
+      const updatedUser = await UsersModel.findByIdAndUpdate(
+        userId,
+        { image: url },
+        { new: true, runValidators: true }
+      );
+      if (updatedUser) {
+        res.send(updatedUser);
+      } else {
+        next(createHttpError(404, `User with id ${userId} was not found`));
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
 
 filesRouter.post(
   "/posts/:postId/image",
