@@ -1,5 +1,6 @@
 import { checkSchema, validationResult } from "express-validator";
 import createHttpError from "http-errors";
+import mongoose from "mongoose";
 
 const postSchema = {
   text: {
@@ -16,8 +17,8 @@ const postSchema = {
   },
   user: {
     in: ["body"],
-    isInt: {
-      errorMessage: "User is mandatory field and needs to be a number!",
+    isString: {
+      errorMessage: "User is mandatory field and needs to be a string!",
     },
   },
 };
@@ -28,7 +29,7 @@ export const triggerPostsBadRequest = (req, res, next) => {
   console.log(errors);
   if (!errors.isEmpty()) {
     next(
-      createHttpError(400, "Errors during user validation", {
+      createHttpError(400, "Errors during post validation", {
         errorsList: errors.array(),
       })
     );
