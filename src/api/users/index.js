@@ -39,10 +39,10 @@ usersRouter.get("/", async (req, res, next) => {
     )
       .limit(mongoQuery.options.limit)
       .skip(mongoQuery.options.skip)
-      .sort(mongoQuery.options.sort)
-      .populate({
-        path: "experience",
-      });
+      .sort(mongoQuery.options.sort);
+    // .populate({
+    //   path: "experience",
+    // });
     res.send({
       links: mongoQuery.links("http://localhost:3001/users", total),
       totalPages: Math.ceil(total / mongoQuery.options.limit),
@@ -54,9 +54,10 @@ usersRouter.get("/", async (req, res, next) => {
 });
 usersRouter.get("/:userId", async (req, res, next) => {
   try {
-    const user = await UsersModel.findById(req.params.userId).populate({
-      path: "experience",
-    });
+    const user = await UsersModel.findById(req.params.userId);
+    //   .populate({
+    //   path: "experience",
+    // });
     if (user) {
       res.send(user);
     } else {
