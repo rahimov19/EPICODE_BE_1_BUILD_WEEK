@@ -144,6 +144,33 @@ filesRouter.get("/:userId/pdf", async (req, res, next) => {
     next(error);
   }
 });
+filesRouter.get("/:userId/experiences/CSV", async (req, res, next) => {
+  try {
+    const userCV = await UsersModel.findById(req.params.userId);
+    const experiences = userCV.experiences;
+    const source = new Readable({
+      read() {
+        this.push(JSON.stringify(experiences));
+        this.push(null);
+      },
+    });
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=experiences.csv"
+    );
+
+    const transform = new json2csv.Transform({
+      fields: ["role", "company", "description"],
+    });
+    const destination = res;
+    pipeline(source, transform, destination, (err) => {
+      if (err) console.log(err);
+    });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
 
 filesRouter.get("/:userId/experiences/CSV", async (req, res, next) => {
   const userId = req.params.userId;
