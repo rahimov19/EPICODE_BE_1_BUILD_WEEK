@@ -127,7 +127,7 @@ filesRouter.get("/:userId/pdf", async (req, res, next) => {
   res.setHeader("Content-Disposition", "attachment; filename=test.pdf");
   try {
     const userCV = await UsersModel.findById(req.params.userId).populate({
-      path: "experience",
+      path: "experiences",
     });
     if (userCV) {
       const source = await getPDFReadableStream(userCV);

@@ -106,7 +106,9 @@ requestsRouter.put(
 requestsRouter.get("/:targetUserId/", async (req, res, next) => {
   try {
     const userId = req.params.targetUserId;
-    const user = await UsersModel.findById(userId);
+    const user = await UsersModel.findById(userId).populate({
+      path: "connections",
+    });
     if (user) {
       const connections = user.connections;
       res.send(connections);
