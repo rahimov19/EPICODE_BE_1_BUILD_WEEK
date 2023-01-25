@@ -38,7 +38,9 @@ postsRouter.post(
 
 postsRouter.get("/", async (req, res, next) => {
   try {
-    const posts = await PostsModel.find().populate("user");
+    const posts = await PostsModel.find()
+      .populate("user")
+      .populate({ path: "comments.user" });
     res.send(posts);
   } catch (error) {
     console.log(error);
@@ -49,7 +51,11 @@ postsRouter.get("/", async (req, res, next) => {
 postsRouter.get("/:postId", async (req, res, next) => {
   try {
     const postId = req.params.postId;
-    const post = await PostsModel.findById(postId).populate("user");
+    const post = await PostsModel.findById(postId)
+      .populate({
+        path: "user",
+      })
+      .populate({ path: "comments.user" });
     if (postId) {
       res.send(post);
     } else {
@@ -132,7 +138,7 @@ postsRouter.post("/:postId/comments", async (req, res, next) => {
 
 postsRouter.get("/:postId/comments", async (req, res, next) => {
   try {
-    const post = await PostsModel.findById(req.params.postId);
+    const post = await PostsModel.findById(req.params.postId).populate("user");
     if (post) {
       res.send(post.comments);
     } else {
