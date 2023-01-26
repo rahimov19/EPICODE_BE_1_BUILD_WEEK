@@ -1,6 +1,7 @@
 import express, { request } from "express";
 import UsersModel from "../users/model.js";
 import httpErrors from "http-errors";
+import createHttpError from "http-errors";
 
 const { NotFound } = httpErrors;
 
@@ -17,7 +18,12 @@ requestsRouter.post("/:targetUserId/pending", async (req, res, next) => {
       );
       console.log(index);
       if (index !== -1) {
-        res.send(`You are already connected with user ${targetUserId}`);
+        next(
+          createHttpError(
+            409,
+            `You are already connected with user ${targetUserId}`
+          )
+        );
       } else {
         const updatedTargetUser = await UsersModel.findByIdAndUpdate(
           targetUserId,
