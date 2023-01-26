@@ -189,10 +189,17 @@ requestsRouter.delete(
       const targetUserId = req.params.targetUserId;
       const updatedCurrentUser = await UsersModel.findByIdAndUpdate(
         currentUserId,
-        { $pull: { "connections.active": targetUserId } },
+        {
+          $pull: { "connections.active": targetUserId },
+        },
         { new: true }
       );
       if (updatedCurrentUser) {
+        await UsersModel.findByIdAndUpdate(
+          targetUserId,
+          { $pull: { "connections.active": currentUserId } },
+          { new: true }
+        );
         res.send(updatedCurrentUser);
       } else {
         next(NotFound(`User with id ${targetUserId} not found`));
