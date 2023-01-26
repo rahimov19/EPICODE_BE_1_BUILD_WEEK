@@ -115,12 +115,8 @@ requestsRouter.put(
       const index = user.connections.pending.findIndex(
         (req) => req._id.toString() === requestId
       );
-<<<<<<< Updated upstream
       const request = user.connections.pending[index].user;
       console.log(request);
-=======
-      const request = user.connections.pending[index];
->>>>>>> Stashed changes
       const updatedcurrentUser = await UsersModel.findByIdAndUpdate(
         currentUserId,
         {

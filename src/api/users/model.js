@@ -14,7 +14,7 @@ export const usersSchema = new Schema(
     experiences: [experienceSchema],
     connections: {
       pending: [requestSchema],
-      active: [],
+      active: [requestSchema],
     },
     title: { type: String },
     username: { type: String, required: true },
