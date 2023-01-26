@@ -2,6 +2,7 @@ import express, { request } from "express";
 import httpErrors from "http-errors";
 import PostsModel from "./model.js";
 import UsersModel from "../users/model.js";
+import likeModel from "./likeModel.js";
 import createHttpError from "http-errors";
 
 import { checkpostSchema, triggerPostsBadRequest } from "./validator.js";
@@ -223,6 +224,45 @@ postsRouter.delete("/:postId/comments/:commentId", async (req, res, next) => {
     );
     if (updatedPost) {
       res.send(updatedPost);
+    } else {
+      next(
+        createHttpError(404, `Post with id ${req.params.postId} not found!`)
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+// ***********************LIKES**********************
+postsRouter.put("/:postId/likes", async (req, res, next) => {
+  try {
+    const post = await PostsModel.findById(req.params.postId);
+
+    if (post) {
+      const index = post.likes.findIndex(
+        (userId) => userId.userId.toString() === req.body.userId
+      );
+      if (index !== -1) {
+        const post = await PostsModel.findByIdAndUpdate(
+          req.params.postId,
+          {
+            $pull: { likes: { userId: req.body.userId } },
+          },
+          { new: true, runValidators: true }
+        );
+
+        res.send(post);
+      } else {
+        const post = await PostsModel.findByIdAndUpdate(
+          req.params.postId,
+          {
+            $push: { likes: { userId: req.body.userId } },
+          },
+          { new: true, runValidators: true }
+        );
+
+        res.send(post);
+      }
     } else {
       next(
         createHttpError(404, `Post with id ${req.params.postId} not found!`)
