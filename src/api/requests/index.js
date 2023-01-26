@@ -115,8 +115,12 @@ requestsRouter.put(
       const index = user.connections.pending.findIndex(
         (req) => req._id.toString() === requestId
       );
+<<<<<<< Updated upstream
       const request = user.connections.pending[index].user;
       console.log(request);
+=======
+      const request = user.connections.pending[index];
+>>>>>>> Stashed changes
       const updatedcurrentUser = await UsersModel.findByIdAndUpdate(
         currentUserId,
         {
@@ -189,9 +193,7 @@ requestsRouter.delete(
       const targetUserId = req.params.targetUserId;
       const updatedCurrentUser = await UsersModel.findByIdAndUpdate(
         currentUserId,
-        {
-          $pull: { "connections.active": targetUserId },
-        },
+        { $pull: { "connections.active": targetUserId } },
         { new: true }
       );
       if (updatedCurrentUser) {
@@ -200,6 +202,7 @@ requestsRouter.delete(
           { $pull: { "connections.active": currentUserId } },
           { new: true }
         );
+        console.log("We are getting here");
         res.send(updatedCurrentUser);
       } else {
         next(NotFound(`User with id ${targetUserId} not found`));
