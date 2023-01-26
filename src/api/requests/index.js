@@ -13,17 +13,19 @@ requestsRouter.post("/:targetUserId/pending", async (req, res, next) => {
     const targetUserId = req.params.targetUserId;
     const currentUser = await UsersModel.findById(currentUserId);
     if (currentUser) {
-      const index = currentUser.connections.active.findIndex(
+      const active = currentUser.connections.active.find(
         (connection) => connection.toString() === targetUserId
       );
-      console.log(index);
-      if (index !== -1) {
-        next(
-          createHttpError(
-            409,
-            `You are already connected with user ${targetUserId}`
-          )
-        );
+      const targetUser = await UsersModel.findById(targetUserId);
+      const pending = targetUser.connections.pending.find(
+        (connection) => connection.user.toString() === currentUserId
+      );
+      if (active) {
+        res
+          .status(409)
+          .send(`You are already connected with user ${targetUserId}`);
+      } else if (pending) {
+        res.status(409).send(`You already sent a request to ${targetUserId}`);
       } else {
         const updatedTargetUser = await UsersModel.findByIdAndUpdate(
           targetUserId,
@@ -47,6 +49,60 @@ requestsRouter.post("/:targetUserId/pending", async (req, res, next) => {
     console.log(error);
     next(error);
   }
+  //   try {
+  //     const currentUserId = req.body.user;
+  //     const targetUserId = req.params.targetUserId;
+  //     const currentUser = await UsersModel.findById(currentUserId);
+
+  //     if (currentUser) {
+  //       const index = currentUser.connections.active.findIndex(
+  //         (connection) => connection.toString() === targetUserId
+  //       );
+
+  //       if (index !== -1) {
+  //         next(
+  //           createHttpError(
+  //             409,
+  //             `You are already connected with user ${targetUserId}`
+  //           )
+  //         );
+  //       } else {
+  //         const targetUser = await UsersModel.findById(targetUserId);
+  //         const secondIndex = targetUser.connections.pending.find(
+  //           (connection) => connection.user.toString() === currentUserId
+  //         );
+  //         console.log(secondIndex);
+  //         if (secondIndex) {
+  //           next(
+  //             createHttpError(
+  //               409,
+  //               `You already sent a request to ${targetUserId}`
+  //             )
+  //           );
+  //         } else {
+  //           const updatedTargetUser = await UsersModel.findByIdAndUpdate(
+  //             targetUserId,
+  //             { $push: { "connections.pending": req.body } },
+  //             { new: true, runValidators: true }
+  //           );
+  //           if (updatedTargetUser) {
+  //             res.status(201).send("Request was sent successfully");
+  //           } else {
+  //             next(NotFound(`TargetUser with id ${userId} was not found`));
+  //           }
+  //         }
+  //       }
+  //     } else {
+  //       next(
+  //         NotFound(
+  //           `Your current user with id ${currentUserId} was not found and is unabble to make a request`
+  //         )
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //     next(error);
+  //   }
 });
 
 requestsRouter.put(
