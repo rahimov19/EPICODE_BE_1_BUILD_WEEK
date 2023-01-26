@@ -12,7 +12,10 @@ export const usersSchema = new Schema(
     email: { type: String, required: true },
     bio: { type: String },
     experiences: [experienceSchema],
-    connections: { pending: [requestSchema], active: [] },
+    connections: {
+      pending: [requestSchema],
+      active: [],
+    },
     title: { type: String },
     username: { type: String, required: true },
     image: { type: String },

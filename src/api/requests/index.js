@@ -107,7 +107,7 @@ requestsRouter.post("/:targetUserId/pending", async (req, res, next) => {
 
 requestsRouter.put(
   "/:currentUserId/acceptRequest/:requestId",
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const currentUserId = req.params.currentUserId;
       const requestId = req.params.requestId;
@@ -115,20 +115,24 @@ requestsRouter.put(
       const index = user.connections.pending.findIndex(
         (req) => req._id.toString() === requestId
       );
-      const request = user.connections.pending[index];
+<<<<<<< Updated upstream
+      const request = user.connections.pending[index].user;
       console.log(request);
+=======
+      const request = user.connections.pending[index];
+>>>>>>> Stashed changes
       const updatedcurrentUser = await UsersModel.findByIdAndUpdate(
         currentUserId,
         {
-          $push: { "connections.active": request.user },
+          $push: { "connections.active": { user: request } },
           $pull: { "connections.pending": { _id: requestId } },
         },
         { new: true, runValidators: true }
       );
       if (updatedcurrentUser) {
         await UsersModel.findByIdAndUpdate(
-          request.user,
-          { $push: { "connections.active": currentUserId } },
+          request,
+          { $push: { "connections.active": { user: currentUserId } } },
           { new: true, runValidators: true }
         );
         res.send(updatedcurrentUser);
@@ -193,6 +197,12 @@ requestsRouter.delete(
         { new: true }
       );
       if (updatedCurrentUser) {
+        await UsersModel.findByIdAndUpdate(
+          targetUserId,
+          { $pull: { "connections.active": currentUserId } },
+          { new: true }
+        );
+        console.log("We are getting here");
         res.send(updatedCurrentUser);
       } else {
         next(NotFound(`User with id ${targetUserId} not found`));
