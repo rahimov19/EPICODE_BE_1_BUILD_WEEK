@@ -54,10 +54,13 @@ usersRouter.get("/", async (req, res, next) => {
 });
 usersRouter.get("/:userId", async (req, res, next) => {
   try {
-    const user = await UsersModel.findById(req.params.userId);
-    //   .populate({
-    //   path: "experience",
-    // });
+    const user = await UsersModel.findById(req.params.userId)
+      .populate({
+        path: "connections.pending.user",
+      })
+      .populate({
+        path: "connections.active.user",
+      });
     if (user) {
       res.send(user);
     } else {
