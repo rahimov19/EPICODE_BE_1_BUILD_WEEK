@@ -1,15 +1,21 @@
 import mongoose from "mongoose";
 
+import experienceSchema from "./experienceModel.js";
+import requestSchema from "../requests/model.js";
 const { Schema, model } = mongoose;
 
-const usersSchema = new Schema(
+export const usersSchema = new Schema(
   {
     name: { type: String, required: true },
     area: { type: String },
     surname: { type: String, required: true },
     email: { type: String, required: true },
     bio: { type: String },
-    experience: { type: mongoose.Types.ObjectId, ref: "Experience" },
+    experiences: [experienceSchema],
+    connections: {
+      pending: [requestSchema],
+      active: [requestSchema],
+    },
     title: { type: String },
     username: { type: String, required: true },
     image: { type: String },
